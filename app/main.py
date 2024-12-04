@@ -44,4 +44,5 @@ if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8080, reload=True)
 
 # 서버 실행은 다음 명령어로 실행
-# uvicorn app.main:app --reload
+# uvicorn app.main:app --reload <- 고정된 포트 8000
+# uvicorn main:app --host 0.0.0.0 --port 8080 --reload 내가 원하는 설정으로 열기
