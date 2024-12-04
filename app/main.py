@@ -18,11 +18,10 @@ async def rest_holiday():
     query_params = {
         "_type": "json",
         "solYear": "2024",
-        "numOfRows": "30",
-        "ServiceKey": config["SECRET_KEY"]
+        "numOfRows": "30"
     }
-    url = f'{config["BASE_URL"]}{GET_POINT}?{urlencode(query_params)}'
-    print(f"Request URL: {url}")
+    url = f'{config["BASE_URL"]}{GET_POINT}?{urlencode(query_params)}&ServiceKey={config["SECRET_KEY"]}'
+    # print(f"Request URL: {url}")
     
     async with httpx.AsyncClient() as client:
         response = await client.get(url)
