@@ -2,22 +2,41 @@ from fastapi import FastAPI
 from app.routers import test_router
 from config import config
 import uvicorn
-import requests
+import httpx
+from urllib.parse import urlencode
 
 app = FastAPI()
 
-GET_POINT = '/getRestDeInfo'
-DEFAULT_QUERY = '?_type=json'
 
 @app.get("/")
 async def root():
     return {"message" : "서버 접속 성공"}
 
-@app.get('/rest-day-info')
+@app.get('/restday-info')
 async def rest_holiday():
-    url = f'{config["BASE_URL"]}{GET_POINT}{DEFAULT_QUERY}&solYear=2024&numOfRows=30&ServiceKey={config["SECRET_KEY"]}'
-    data = requests.get(url)
-    return {"data" : data.json()}
+    GET_POINT = '/getRestDeInfo'
+    query_params = {
+        "_type": "json",
+        "solYear": "2024",
+        "numOfRows": "30",
+        "ServiceKey": config["SECRET_KEY"]
+    }
+    url = f'{config["BASE_URL"]}{GET_POINT}?{urlencode(query_params)}'
+    print(f"Request URL: {url}")
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url)
+    
+    if response.status_code != 200:
+        return {"error": f"API 호출 실패. 상태 코드: {response.status_code}"}
+    
+    try:
+        data = response.json()
+    except ValueError:
+        return {"error": "응답 데이터를 JSON으로 변환할 수 없습니다."}
+    
+    return {"data": data}
+
 
  
 app.include_router(test_router.router, prefix='/test', tags=["test"])
