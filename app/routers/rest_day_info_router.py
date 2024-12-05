@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from config import config
 import httpx
 from urllib.parse import urlencode
@@ -6,13 +6,16 @@ from urllib.parse import urlencode
 router = APIRouter()
 
 @router.get('/restday-info')
-async def rest_holiday():
+async def rest_holiday(solYear: str = Query(default="2024"), solMonth: str = Query(default="")):
+
     GET_POINT = '/getRestDeInfo'
     query_params = {
         "_type": "json",
-        "solYear": "2024",
+        "solYear": solYear,
+        "solMonth": solMonth,
         "numOfRows": "30"
     }
+    
     url = f'{config["BASE_URL"]}{GET_POINT}?{urlencode(query_params)}&ServiceKey={config["SECRET_KEY"]}'
     # print(f"Request URL: {url}")
     
