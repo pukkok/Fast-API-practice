@@ -10,11 +10,15 @@ router = APIRouter()
 async def rest_holiday(solYear: str = Query(default="2024"), solMonth: str = Query(default="")):
     # ? 공휴일정보를 가져오는 경로
     GET_POINT = '/getRestDeInfo'
+
+    # ? 2자리수로 맞춰주기 위한 작업
+    pad_month = str(solMonth).zfill(2)
+
     # ? API를 불러오기위한 쿼리파라미터 딕셔너리
     query_params = {
         "_type": "json",
         "solYear": solYear,
-        "solMonth": solMonth,
+        "solMonth": pad_month,
         "numOfRows": "30"
     }
     
