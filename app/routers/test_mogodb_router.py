@@ -7,9 +7,9 @@ router = APIRouter()
 
 # * 데이터베이스를 업데이트 할 때 사용한다.
 @router.get('/restday-update-db')
-async def rest_update_db(request: Request):
+async def rest_update_db(request: Request, year : str = Query(default=str(currentYear))):
 
-    API_URL = get_API_URL() # * 공휴일 API URL
+    API_URL = get_API_URL(year) # * 공휴일 API URL
 
     async with httpx.AsyncClient() as client:
         res = await client.get(API_URL)
@@ -20,14 +20,14 @@ async def rest_update_db(request: Request):
     try:
         data = res.json()
         datas = {
-            "base_year": "2024",
+            "base_year": f"{year}",
             "item": data["response"]["body"]["items"]["item"]
         }
 
         collection = request.app.mongodb["restday_info"]
 
         # * 이미 존재하는 도큐먼트 확인
-        document = await collection.find_one({"base_year": "2024"})
+        document = await collection.find_one({"base_year": f"{year}"})
         if not document:
             # ? 도큐먼트가 없으면 삽입
             result = await collection.insert_one(datas)
