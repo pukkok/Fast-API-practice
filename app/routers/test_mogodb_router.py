@@ -32,7 +32,7 @@ async def rest_ind(request: Request):
         data = res.json()
         datas = {
             "base_year" : "2024",
-            "data" : data["response"]["body"]["items"]
+            "item" : data["response"]["body"]["items"]["item"]
         }
 
         # MongoDB 저장 (restday_info 컬렉션)
