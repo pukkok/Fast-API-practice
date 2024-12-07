@@ -3,6 +3,9 @@ from config import config
 import httpx
 from urllib.parse import urlencode
 
+from bson import ObjectId  # MongoDB ObjectId를 다룰 때 사용
+from typing import List
+
 router = APIRouter()
 
 @router.get('/restday-ind')
@@ -27,10 +30,13 @@ async def rest_ind(request: Request):
 
     try:
         data = res.json()
-        print(data)
+        datas = {
+            "year" : "2024",
+            "data" : data
+        }
 
         # MongoDB 저장 (restday_info 컬렉션)
-        result = await request.app.mongodb["restday_info"].insert_one(data)
+        result = await request.app.mongodb["restday_info"].insert_one(datas)
         print(f"Inserted ID: {result.inserted_id}")
 
     except ValueError:
@@ -39,3 +45,27 @@ async def rest_ind(request: Request):
         return {"error": f"MongoDB 저장 실패: {str(e)}"}
 
     return {"message": "MongoDB 사용 성공", "inserted_id": str(result.inserted_id)}
+
+
+# @router.get('/restday-list')
+# async def get_restday_list(request: Request):
+#     """
+#     MongoDB에서 restday_info 컬렉션의 모든 데이터를 불러옵니다.
+#     """
+#     try:
+#         # MongoDB 컬렉션 객체
+#         collection = request.app.mongodb["restday_info"]
+#         # print(collection)
+#         # 모든 데이터를 가져오기 (커서 사용)
+#         cursor = collection.find({})
+#         print(cursor)
+        
+#         # result = []
+#         # async for document in cursor:
+#         #     document["_id"] = str(document["_id"])  # ObjectId를 문자열로 변환
+#         #     result.append(document)
+
+#         # return result
+#         return {"msg" : "동작중"}
+#     except Exception as e:
+#         return {"error": f"MongoDB 데이터를 가져오는 중 오류 발생: {str(e)}"}
