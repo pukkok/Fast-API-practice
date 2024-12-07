@@ -18,9 +18,11 @@ async def rest_holiday(solYear: str = Query(default="2024"), solMonth: str = Que
     query_params = {
         "_type": "json",
         "solYear": solYear,
-        "solMonth": pad_month,
         "numOfRows": "30"
     }
+    
+    if pad_month != "00" :
+        query_params["solMonth"] = pad_month
     
     url = f'{config["BASE_URL"]}{GET_POINT}?{urlencode(query_params)}&ServiceKey={config["SECRET_KEY"]}'
     # print(f"Request URL: {url}")
