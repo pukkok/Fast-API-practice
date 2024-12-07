@@ -1,7 +1,5 @@
 from fastapi import APIRouter, Request, Query
-from config import config
 import httpx
-from urllib.parse import urlencode
 from app.lib.get_current_Year import currentYear
 from app.lib.get_API_URL import get_API_URL
 
