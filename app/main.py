@@ -3,6 +3,7 @@ import uvicorn # ? 서버 실행 도구
 
 from app.routers import test_router # ? test 라우터
 from app.routers import rest_day_info_router # ? 공휴일 불러오기 라우터
+from app.routers import test_mogodb_router
 
 # ? MongoDB 비동기 클라이언트 
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -36,6 +37,8 @@ async def root():
 # ? app에 prefix로 엔드포인트를 설정하여 router를 불러올 수 있다. 
 app.include_router(test_router.router, prefix='/test', tags=["test"])
 app.include_router(rest_day_info_router.router, prefix='/api', tags=["holiday"])
+
+app.include_router(test_mogodb_router.router, prefix="/mongo", tags=["mongoDB"])
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8080, reload=True)
