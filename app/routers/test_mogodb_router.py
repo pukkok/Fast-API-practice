@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Query
 from config import config
 import httpx
 from urllib.parse import urlencode
@@ -51,16 +51,16 @@ async def rest_update_db(request: Request):
         return {"error": f"MongoDB 저장 실패: {str(e)}"}
 
 
-
-@router.get('/restday-outd')
-async def get_restday_list(request: Request):
+# * 공휴일 연도별 데이터를 불러온다.
+@router.get('/restday-list')
+async def get_restday_list(request: Request, year : str = Query(default=str(currentYear))):
     # TODO : MongoDB에서 restday_info 컬렉션 연도별 공휴일 데이터 불러오기
     try:
         # * MongoDB 컬렉션 객체
         collection = request.app.mongodb["restday_info"]
 
         # * 특정 연도의 데이터만 가져오기 (예: base_year가 "2024"인 데이터)
-        document = await collection.find_one({"base_year": "2024"})
+        document = await collection.find_one({"base_year": year})
 
         # * 데이터가 없을 경우의 오류처리
         if not document:
