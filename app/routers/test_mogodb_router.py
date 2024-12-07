@@ -2,25 +2,19 @@ from fastapi import APIRouter, Request
 from config import config
 import httpx
 from urllib.parse import urlencode
+from app.lib.get_current_Year import currentYear
+from app.lib.get_API_URL import get_API_URL
 
 router = APIRouter()
 
-@router.get('/restday-ind')
-async def rest_ind(request: Request):
-    # 공휴일 정보를 가져오는 경로
-    GET_POINT = '/getRestDeInfo'
+# * 데이터베이스를 업데이트 할 때 사용한다.
+@router.get('/restday-update-db')
+async def rest_update_db(request: Request):
 
-    query_params = {
-        "_type": "json",
-        "solYear": "2024",
-        "numOfRows": "30"
-    }
-
-    url = f'{config["BASE_URL"]}{GET_POINT}?{urlencode(query_params)}&ServiceKey={config["SECRET_KEY"]}'
-    print(f"Request URL: {url}")
+    API_URL = get_API_URL() # * 공휴일 API URL
 
     async with httpx.AsyncClient() as client:
-        res = await client.get(url)
+        res = await client.get(API_URL)
 
     if res.status_code != 200:
         return {"error": "API 호출 실패", "code": f"{res.status_code}"}
