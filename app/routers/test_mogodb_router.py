@@ -55,16 +55,17 @@ async def get_restday_list(request: Request):
     try:
         # MongoDB 컬렉션 객체
         collection = request.app.mongodb["restday_info"]
-        # print(collection)
-        # 모든 데이터를 가져오기 (커서 사용)
-        data = await collection.find_one({"base_year" : "2024"})
-        print(data["data"])        
-        # result = []
-        # async for document in cursor:
-        #     document["_id"] = str(document["_id"])  # ObjectId를 문자열로 변환
-        #     result.append(document)
+
+        # 특정 연도의 데이터만 가져오기 (예: base_year가 "2024"인 데이터)
+        document = await collection.find_one({"base_year": "2024"})
+
+        if not document:
+            return {"error": "해당 연도의 데이터가 없습니다."}
+
+        if "_id" in document:
+            document.pop("_id")
 
         # return result
-        return {"msg" : "동작중", "data" : "data"}
+        return {"msg" : "동작중", "data" : document}
     except Exception as e:
         return {"error": f"MongoDB 데이터를 가져오는 중 오류 발생: {str(e)}"}
