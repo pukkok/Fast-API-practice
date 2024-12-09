@@ -8,6 +8,8 @@ from app.routers import mogodb_router # ? 데이터베이스 라우터
 # ? MongoDB 비동기 클라이언트 
 from motor.motor_asyncio import AsyncIOMotorClient
 
+from config import config
+
 # * fastapi의 app.on_event를 더이상 사용하지 않는다.
 # ? lifespan 함수를 만들기 위해 사용
 # todo : asynccontextmanager 데코레이터를 사용해 앱의 생명 주기를 관리
@@ -17,8 +19,8 @@ from contextlib import asynccontextmanager
 async def lifespan(app: FastAPI):
     # 앱 시작 시 실행되는 코드 (startup 대체)
     print("앱 시작: MongoDB 연결 설정 중...")
-    app.mongodb_client = AsyncIOMotorClient("mongodb://localhost:27017")
-    app.mongodb = app.mongodb_client["python-db"]  # 사용할 데이터베이스 선택
+    app.mongodb_client = AsyncIOMotorClient(config["MONGODB_URI"])
+    app.mongodb = app.mongodb_client["holiday_db"]  # 사용할 데이터베이스 선택
     print("MongoDB 연결 성공")
 
     yield  # * 애플리케이션 실행
