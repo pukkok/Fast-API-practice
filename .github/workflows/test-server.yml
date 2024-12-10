@@ -46,7 +46,7 @@ jobs:
       # 6. 서버 시작 대기 (시간을 좀 더 길게 설정하거나 체크 후 요청)
       - name: Wait for server to start
         run: |
-          for i in {1..10}; do
+          for i in {1..20}; do  # 기다리는 시간을 20번으로 늘려서 60초까지 기다리기
             curl -s http://127.0.0.1:5835 > /dev/null && break || sleep 3
           done
 
