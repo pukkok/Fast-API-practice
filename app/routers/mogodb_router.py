@@ -31,20 +31,20 @@ async def rest_update_db(request: Request, year : str = Query(default=str(curren
         if not document:
             # ? 도큐먼트가 없으면 삽입
             result = await collection.insert_one(datas)
-            return {"msg": "새 도큐먼트를 추가했습니다.", "inserted_id": str(result.inserted_id)}
+            return {"msg": "Added a new document.", "inserted_id": str(result.inserted_id)}
         else:
             # ? 도큐먼트가 있으면 업데이트
             update_result = await collection.update_one(
-                {"base_year": "2024"},  # ? 업데이트 조건
+                {"base_year": f"{year}"},  # ? 업데이트 조건
                 {"$set": {"item": datas["item"]}}  # ? 업데이트 내용
             )
             if update_result.modified_count > 0:
-                return {"msg": "기존 도큐먼트를 업데이트했습니다."}
+                return {"msg": "Update completed"}
             else:
-                return {"msg": "업데이트할 내용이 없어 기존 도큐먼트를 그대로 유지했습니다."}
+                return {"msg": "No update changes. Maintain existing document"}
 
     except ValueError:
-        return {"error": "응답 데이터를 JSON으로 변환할 수 없습니다."}
+        return {"error": "Unable to convert response data to JSON."}
     except Exception as e:
         return {"error": f"MongoDB 저장 실패: {str(e)}"}
 
