@@ -40,15 +40,14 @@ jobs:
       - name: Start FastAPI server
         run: |
           source .venv/bin/activate
-          uvicorn app.main:app --host 0.0.0.0 --port 5835 &
+          nohup uvicorn app.main:app --host 0.0.0.0 --port 5835 & # 백그라운드 실행
+          sleep 5  # 5초 대기 후
           echo "FastAPI server started on port 5835"
-
-      # 6. 서버 시작 대기 (시간을 좀 더 길게 설정하거나 체크 후 요청)
-      - name: Wait for server to start
+          
+        # 서버가 실행 중인지 확인
+      - name: Check if uvicorn is running
         run: |
-          for i in {1..20}; do  # 기다리는 시간을 20번으로 늘려서 60초까지 기다리기
-            curl -s http://127.0.0.1:5835 > /dev/null && break || sleep 3
-          done
+          ps aux | grep uvicorn
 
       # 7. /mongo/restday-update-db 호출
       - name: Call MongoDB Update API
