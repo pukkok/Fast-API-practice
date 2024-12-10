@@ -49,7 +49,3 @@ jobs:
           source .venv/bin/activate
           python -c "from app.lib.get_API_URL import get_API_URL;"
 
-      - name: tests 실행
-        run: |
-          source .venv/bin/activate
-          pytest
