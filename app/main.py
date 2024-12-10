@@ -17,15 +17,17 @@ from contextlib import asynccontextmanager
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # 앱 시작 시 실행되는 코드 (startup 대체)
     print("앱 시작: MongoDB 연결 설정 중...")
-    app.mongodb_client = AsyncIOMotorClient(config["MONGODB_URI"])
-    app.mongodb = app.mongodb_client["holiday_db"]  # 사용할 데이터베이스 선택
-    print("MongoDB 연결 성공")
-
-    yield  # * 애플리케이션 실행
-
-    # 앱 종료 시 실행되는 코드 (shutdown 대체)
+    try:
+        app.mongodb_client = AsyncIOMotorClient(config["MONGODB_URI"])
+        app.mongodb = app.mongodb_client["holiday_db"]
+        print("MongoDB 연결 성공")
+    except Exception as e:
+        print(f"MongoDB 연결 실패: {e}")
+        raise e
+    
+    yield
+    
     print("앱 종료: MongoDB 연결 해제 중...")
     app.mongodb_client.close()
     print("MongoDB 연결 해제 완료")
