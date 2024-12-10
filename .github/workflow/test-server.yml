@@ -1,0 +1,48 @@
+name: Test FastAPI Server
+
+on:
+  push:
+    branches:
+      - ci-1
+
+jobs:
+  test-server:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 코드 체크아웃
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Python 환경 설정
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      # 3. venv 생성 및 의존성 설치
+      - name: Create and activate virtual environment
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 4. FastAPI 서버 백그라운드 실행
+      - name: Start FastAPI Server
+        run: |
+          source .venv/bin/activate
+          uvicorn main:app --host 127.0.0.1 --port 8080 &
+        shell: bash
+
+      # 5. 테스트 실행
+      - name: Test Endpoints
+        run: |
+          source .venv/bin/activate
+          pip install httpx pytest
+          pytest tests/
+
+      # 6. 서버 종료 (옵션: 필요 시)
+      - name: Stop Server
+        if: always()
+        run: pkill -f "uvicorn"
