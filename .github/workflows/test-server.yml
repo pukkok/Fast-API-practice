@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest  # Windows 환경에서 실행
 
     steps:
       # 1. 레포지토리 체크아웃
@@ -25,7 +25,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m venv .venv
-          source .venv/bin/activate
+          .\.venv\Scripts\Activate.ps1
           pip install -r requirements.txt
 
       # 4. 환경 변수 설정
@@ -34,27 +34,46 @@ jobs:
           BASE_URL: ${{ secrets.BASE_URL }}
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
-        run: echo "Environment variables configured."
+        run: |
+          Write-Host "Environment variables configured."
 
       # 5. FastAPI 서버 실행 (백그라운드)
       - name: Start FastAPI server
         run: |
-          source .venv/bin/activate
-          nohup uvicorn app.main:app --host 0.0.0.0 --port 5835 & # 백그라운드 실행
-          sleep 5  # 5초 대기 후
-          echo "FastAPI server started on port 5835"
-          
-        # 서버가 실행 중인지 확인
-      - name: Check if uvicorn is running
-        run: |
-          ps aux | grep uvicorn
+          .\.venv\Scripts\Activate.ps1
+          Start-Process "uvicorn" -ArgumentList "app.main:app --host 0.0.0.0 --port 5835" -NoNewWindow
+          Write-Host "FastAPI server started on port 5835"
 
-      # 7. /mongo/restday-update-db 호출
-      - name: Call MongoDB Update API
-        env:
-          BASE_URL: ${{ secrets.BASE_URL }}
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
-          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+      # 6. 서버 시작 대기
+      - name: Wait for server to start
         run: |
-          curl -v -X GET "http://127.0.0.1:5835/mongo/restday-update-db"
-          echo "finished work"
+          $retries = 10
+          $success = $false
+          for ($i=0; $i -lt $retries; $i++) {
+            try {
+              $response = Invoke-WebRequest -Uri "http://127.0.0.1:5835" -Method GET
+              if ($response.StatusCode -eq 200) {
+                $success = $true
+                break
+              }
+            }
+            catch {
+              Start-Sleep -Seconds 3
+            }
+          }
+          if (-not $success) {
+            Write-Host "Server did not start in time"
+            exit 1
+          }
+
+      # 7. /mongo/restday-update-db 호출 (curl 사용)
+      - name: Call MongoDB Update API using curl
+        run: |
+          curl.exe -v -X GET "http://127.0.0.1:5835/mongo/restday-update-db"
+          Write-Host "finished work"
+
+      # 8. /mongo/restday-update-db 호출 (Invoke-WebRequest 사용)
+      - name: Call MongoDB Update API using Invoke-WebRequest
+        run: |
+          Invoke-WebRequest -Uri "http://127.0.0.1:5835/mongo/restday-update-db" -Method GET
+          Write-Host "finished work"
