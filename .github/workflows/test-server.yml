@@ -41,6 +41,7 @@ jobs:
         run: |
           source .venv/bin/activate
           uvicorn app.main:app --host 0.0.0.0 --port 5835 &
+          echo "FastAPI server started on port 5835"
 
       # 6. 서버 시작 대기 (시간을 좀 더 길게 설정하거나 체크 후 요청)
       - name: Wait for server to start
@@ -56,4 +57,5 @@ jobs:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
         run: |
-          curl -X GET "http://127.0.0.1:5835/mongo/restday-update-db"
+          curl -v -X GET "http://127.0.0.1:5835/mongo/restday-update-db"
+          echo "finished work"
