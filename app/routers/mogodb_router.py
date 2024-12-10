@@ -7,46 +7,58 @@ router = APIRouter()
 
 # * 데이터베이스를 업데이트 할 때 사용한다.
 @router.get('/restday-update-db')
-async def rest_update_db(request: Request, year : str = Query(default=str(currentYear))):
+async def rest_update_db(request: Request, year: str = Query(default=str(currentYear))):
+    print(f"Received request to update database for year: {year}")
 
-    API_URL = get_API_URL(year) # * 공휴일 API URL
-
-    async with httpx.AsyncClient() as client:
-        res = await client.get(API_URL)
-
-    if res.status_code != 200:
-        return {"error": "API 호출 실패", "code": f"{res.status_code}"}
+    API_URL = get_API_URL(year)  # 공휴일 API URL
+    print(f"Fetching data from API URL: {API_URL}")
 
     try:
+        async with httpx.AsyncClient() as client:
+            res = await client.get(API_URL)
+            print(f"API response status code: {res.status_code}")
+        
+        if res.status_code != 200:
+            return {"error": "API 호출 실패", "code": f"{res.status_code}"}
+
         data = res.json()
         datas = {
             "base_year": f"{year}",
             "item": data["response"]["body"]["items"]["item"]
         }
+        print(f"Data to be inserted/updated: {datas}")
 
         collection = request.app.mongodb["restday_info"]
 
-        # * 이미 존재하는 도큐먼트 확인
+        # 이미 존재하는 도큐먼트 확인
         document = await collection.find_one({"base_year": f"{year}"})
         if not document:
-            # ? 도큐먼트가 없으면 삽입
+            # 도큐먼트가 없으면 삽입
+            print("No existing document found, inserting a new document.")
             result = await collection.insert_one(datas)
+            print(f"Inserted new document with id: {result.inserted_id}")
             return {"msg": "Added a new document.", "inserted_id": str(result.inserted_id)}
         else:
-            # ? 도큐먼트가 있으면 업데이트
+            # 도큐먼트가 있으면 업데이트
+            print("Existing document found, performing update.")
             update_result = await collection.update_one(
-                {"base_year": f"{year}"},  # ? 업데이트 조건
-                {"$set": {"item": datas["item"]}}  # ? 업데이트 내용
+                {"base_year": f"{year}"},  # 업데이트 조건
+                {"$set": {"item": datas["item"]}}  # 업데이트 내용
             )
             if update_result.modified_count > 0:
+                print("Update completed successfully.")
                 return {"msg": "Update completed"}
             else:
+                print("No update changes. Document remains unchanged.")
                 return {"msg": "No update changes. Maintain existing document"}
 
-    except ValueError:
+    except ValueError as e:
+        print(f"Error parsing JSON: {e}")
         return {"error": "Unable to convert response data to JSON."}
     except Exception as e:
-        return {"error": f"MongoDB 저장 실패: {str(e)}"}
+        print(f"MongoDB save failed: {str(e)}")
+        return {"error": f"MongoDB save failed: {str(e)}"}
+
 
 
 # * 공휴일 연도별 데이터를 불러온다.
