@@ -6,12 +6,7 @@
       "use": "@vercel/python"
     }
   ],
-  "functions": {
-    "app/main.py": {
-      "runtime": "python3.10", 
-      "regions": ["icn1"]
-    }
-  },
+  "regions" : ["icn1"],
   "routes": [
     {
       "src": "/(.*)",
