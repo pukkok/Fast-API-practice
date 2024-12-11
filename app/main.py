@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 import uvicorn
 from app.routers import mogodb_router
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -14,20 +14,9 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 async def lifespan(app: FastAPI):
     print("앱 시작: MongoDB 연결 설정 중...")
     try:
-        # MongoDB 연결 시도
         app.mongodb_client = AsyncIOMotorClient(config["MONGODB_URI"])
-
-        # MongoDB 연결 상태 확인
-        # ping() 명령을 통해 연결 상태를 점검
-        try:
-            await app.mongodb_client.admin.command('ping')
-            print("MongoDB 연결 성공")
-        except Exception as e:
-            print(f"MongoDB 연결 실패: {e}")
-            raise e
-        
-        # DB 연결 객체
         app.mongodb = app.mongodb_client["holiday_db"]
+        print("MongoDB 연결 성공")
     except Exception as e:
         print(f"MongoDB 연결 실패: {e}")
         raise e
@@ -43,6 +32,24 @@ app = FastAPI(lifespan=lifespan)
 @app.get("/")
 async def root():
     return {"message": "서버 접속 성공"}
+
+@app.get('/hi')
+async def insa():
+    return {"message": "안녕"}
+
+@app.get("/test-db-connection")
+async def test_db_connection(request: Request):
+
+    try:
+        collection = request.app.mongodb["holiday_db"]
+        # 간단한 쿼리 실행
+        test_document = await collection.find_one({"base_year": "2023"})
+        if test_document:
+            return {"msg": "MongoDB 연결 성공", "data": test_document}
+        else:
+            return {"error": "MongoDB 연결 성공, 하지만 데이터 없음"}
+    except Exception as e:
+        return {"error": f"MongoDB 연결 실패: {str(e)}"}
 
 # MongoDB 라우터 포함
 app.include_router(mogodb_router.router, prefix="/mongo", tags=["mongoDB"])
