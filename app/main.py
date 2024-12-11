@@ -1,8 +1,6 @@
 from fastapi import FastAPI
 import uvicorn # ? 서버 실행 도구
 
-from app.routers import test_router # ? test 라우터
-from app.routers import rest_day_info_router # ? 공휴일 불러오기 라우터
 from app.routers import mogodb_router # ? 데이터베이스 라우터
 
 # ? MongoDB 비동기 클라이언트 
@@ -43,10 +41,6 @@ app = FastAPI(lifespan=lifespan)
 @app.get("/")
 async def root():
     return {"message" : "서버 접속 성공"}
-
-# ? app에 prefix로 엔드포인트를 설정하여 router를 불러올 수 있다. 
-app.include_router(test_router.router, prefix='/test', tags=["test"])
-app.include_router(rest_day_info_router.router, prefix='/api', tags=["holiday"])
 
 app.include_router(mogodb_router.router, prefix="/mongo", tags=["mongoDB"])
 
