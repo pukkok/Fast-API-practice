@@ -14,18 +14,29 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 async def lifespan(app: FastAPI):
     print("앱 시작: MongoDB 연결 설정 중...")
     try:
-        # MongoDB 클라이언트 설정 (state에 저장)
-        app.state.mongodb_client = AsyncIOMotorClient(config["MONGODB_URI"])
-        app.state.mongodb = app.state.mongodb_client["holiday_db"]
-        print("MongoDB 연결 성공")
-        yield
+        # MongoDB 연결 시도
+        app.mongodb_client = AsyncIOMotorClient(config["MONGODB_URI"])
+
+        # MongoDB 연결 상태 확인
+        # ping() 명령을 통해 연결 상태를 점검
+        try:
+            await app.mongodb_client.admin.command('ping')
+            print("MongoDB 연결 성공")
+        except Exception as e:
+            print(f"MongoDB 연결 실패: {e}")
+            raise e
+        
+        # DB 연결 객체
+        app.mongodb = app.mongodb_client["holiday_db"]
     except Exception as e:
         print(f"MongoDB 연결 실패: {e}")
         raise e
-    finally:
-        print("앱 종료: MongoDB 연결 해제 중...")
-        app.state.mongodb_client.close()
-        print("MongoDB 연결 해제 완료")
+    
+    yield
+    
+    print("앱 종료: MongoDB 연결 해제 중...")
+    app.mongodb_client.close()
+    print("MongoDB 연결 해제 완료")
 
 app = FastAPI(lifespan=lifespan)
 
