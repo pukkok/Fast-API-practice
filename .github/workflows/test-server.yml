@@ -25,7 +25,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m venv .venv
-          .\.venv\Scripts\Activate.ps1
+          .\.venv\Scripts\activate
           pip install -r requirements.txt
 
       # 4. 환경 변수 설정
@@ -40,7 +40,7 @@ jobs:
       # 5. FastAPI 서버 실행 (백그라운드)
       - name: Start FastAPI server
         run: |
-          .\.venv\Scripts\Activate.ps1
+          .\.venv\Scripts\activate
           Start-Process "uvicorn" -ArgumentList "app.main:app --host 0.0.0.0 --port 5835" -NoNewWindow
           Write-Host "FastAPI server started on port 5835"
 
