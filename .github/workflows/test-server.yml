@@ -21,15 +21,16 @@ jobs:
         with:
           python-version: '3.10'
 
-      # 패키지 설치 전 pip 업그레이드
-      - name: Upgrade pip
-        run: python -m pip install --upgrade pip
+      # 캐시 정리
+      - name: Clear Python cache
+        run: python -m pip cache purge
 
       # 3. 의존성 패키지 설치
       - name: Install dependencies
         run: |
-          python -m venv .venv
-          .\.venv\Scripts\activate
+          python -m venv venv
+          .\venv\Scripts\activate
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       # 4. 환경 변수 설정
@@ -44,7 +45,7 @@ jobs:
       # 5. FastAPI 서버 실행 (백그라운드)
       - name: Start FastAPI server
         run: |
-          .\.venv\Scripts\activate
+          .\venv\Scripts\activate
           Start-Process "uvicorn" -ArgumentList "app.main:app --host 0.0.0.0 --port 5835" -NoNewWindow
           Write-Host "FastAPI server started on port 5835"
 
