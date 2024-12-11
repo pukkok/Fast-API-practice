@@ -33,6 +33,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      # utf-8 인코딩    
+      - name: Set UTF-8 Encoding
+        run: |
+          [System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
+
       # 4. 환경 변수 설정
       - name: Set environment variables
         env:

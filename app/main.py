@@ -10,6 +10,12 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 from config import config
 
+import sys
+import io
+
+# 출력 스트림을 UTF-8로 설정
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
 # * fastapi의 app.on_event를 더이상 사용하지 않는다.
 # ? lifespan 함수를 만들기 위해 사용
 # todo : asynccontextmanager 데코레이터를 사용해 앱의 생명 주기를 관리
