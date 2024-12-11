@@ -5,19 +5,18 @@ from app.lib.get_API_URL import get_API_URL
 
 router = APIRouter()
 
-# * 데이터베이스를 업데이트 할 때 사용한다.
 @router.get('/restday-update-db')
 async def rest_update_db(request: Request, year: str = Query(default=str(currentYear))):
     print(f"Received request to update database for year: {year}")
 
-    API_URL = get_API_URL(year)  # 공휴일 API URL
+    API_URL = get_API_URL(year)
     print(f"Fetching data from API URL: {API_URL}")
 
     try:
         async with httpx.AsyncClient() as client:
             res = await client.get(API_URL)
             print(f"API response status code: {res.status_code}")
-        
+
         if res.status_code != 200:
             return {"error": "API 호출 실패", "code": f"{res.status_code}"}
 
@@ -28,7 +27,8 @@ async def rest_update_db(request: Request, year: str = Query(default=str(current
         }
         print(f"Data to be inserted/updated: {datas}")
 
-        collection = request.app.mongodb["restday_info"]
+        # MongoDB 연결 (request.app.state.mongodb)
+        collection = request.app.state.mongodb["restday_info"]
 
         # 이미 존재하는 도큐먼트 확인
         document = await collection.find_one({"base_year": f"{year}"})
@@ -59,27 +59,22 @@ async def rest_update_db(request: Request, year: str = Query(default=str(current
         print(f"MongoDB save failed: {str(e)}")
         return {"error": f"MongoDB save failed: {str(e)}"}
 
-
-
-# * 공휴일 연도별 데이터를 불러온다.
 @router.get('/restday-list')
-async def get_restday_list(request: Request, year : str = Query(default=str(currentYear))):
-    # TODO : MongoDB에서 restday_info 컬렉션 연도별 공휴일 데이터 불러오기
+async def get_restday_list(request: Request, year: str = Query(default=str(currentYear))):
     try:
-        # * MongoDB 컬렉션 객체
-        collection = request.app.mongodb["restday_info"]
+        # MongoDB 연결 (request.app.state.mongodb)
+        collection = request.app.state.mongodb["restday_info"]
 
-        # * 특정 연도의 데이터만 가져오기 (예: base_year가 "2024"인 데이터)
+        # 특정 연도의 데이터만 가져오기
         document = await collection.find_one({"base_year": year})
 
-        # * 데이터가 없을 경우의 오류처리
         if not document:
             return {"error": "해당 연도의 데이터가 없습니다."}
 
-        # * _id 값은 삭제 처리  
+        # _id 값 삭제
         if "_id" in document:
             document.pop("_id")
 
-        return {"msg" : "데이터를 정상적으로 불러왔습니다.", "data" : document}
+        return {"msg": "데이터를 정상적으로 불러왔습니다.", "data": document}
     except Exception as e:
         return {"error": f"MongoDB 데이터를 가져오는 중 오류 발생: {str(e)}"}
