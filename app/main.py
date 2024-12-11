@@ -8,6 +8,9 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 from config import config
 
+import os
+
+
 # * fastapi의 app.on_event를 더이상 사용하지 않는다.
 # ? lifespan 함수를 만들기 위해 사용
 # todo : asynccontextmanager 데코레이터를 사용해 앱의 생명 주기를 관리
@@ -35,6 +38,11 @@ app = FastAPI(lifespan=lifespan)
 @app.get("/")
 async def root():
     return {"message" : "서버 접속 성공"}
+
+@app.get('/db-test')
+async def db_test():
+    data = os.getenv("MONGODB_URI")
+    return {"result" : data}
 
 app.include_router(mogodb_router.router, prefix="/mongo", tags=["mongoDB"])
 
