@@ -53,7 +53,7 @@ jobs:
         run: |
           .\venv\Scripts\activate
           uvicorn app.main:app --host 0.0.0.0 --port 5835 --log-level debug > server.log 2>&1 &
-          Start-Sleep -Seconds 5
+          Start-Sleep -Seconds 10  # 서버가 충분히 초기화될 수 있도록 대기 시간 늘리기
           Get-Content server.log
 
       # 서버 동작 테스트 유효성 검사
