@@ -1,14 +1,17 @@
-from fastapi import FastAPI, Request
-import uvicorn
-from app.routers import mogodb_router
-from motor.motor_asyncio import AsyncIOMotorClient
-from config import config
-import sys
-import io
-from contextlib import asynccontextmanager
+from fastapi import FastAPI
+import uvicorn # ? 서버 실행 도구
 
-# 출력 스트림을 UTF-8로 설정
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+from app.routers import mogodb_router # ? 데이터베이스 라우터
+
+# ? MongoDB 비동기 클라이언트 
+from motor.motor_asyncio import AsyncIOMotorClient
+
+from config import config
+
+# * fastapi의 app.on_event를 더이상 사용하지 않는다.
+# ? lifespan 함수를 만들기 위해 사용
+# todo : asynccontextmanager 데코레이터를 사용해 앱의 생명 주기를 관리
+from contextlib import asynccontextmanager
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -31,28 +34,13 @@ app = FastAPI(lifespan=lifespan)
 
 @app.get("/")
 async def root():
-    return {"message": "서버 접속 성공"}
+    return {"message" : "서버 접속 성공"}
 
-@app.get('/hi')
-async def insa():
-    return {"message": "안녕"}
-
-@app.get("/test-db-connection")
-async def test_db_connection(request: Request):
-
-    try:
-        collection = request.app.mongodb["holiday_db"]
-        # 간단한 쿼리 실행
-        test_document = await collection.find_one({"base_year": "2023"})
-        if test_document:
-            return {"msg": "MongoDB 연결 성공", "data": test_document}
-        else:
-            return {"error": "MongoDB 연결 성공, 하지만 데이터 없음"}
-    except Exception as e:
-        return {"error": f"MongoDB 연결 실패: {str(e)}"}
-
-# MongoDB 라우터 포함
 app.include_router(mogodb_router.router, prefix="/mongo", tags=["mongoDB"])
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8080, reload=True)
+
+# 서버 실행은 다음 명령어로 실행
+# * uvicorn app.main:app --reload <- 고정된 포트 8000
+# * uvicorn app.main:app --port 8080 --reload 내가 원하는 설정으로 열기
