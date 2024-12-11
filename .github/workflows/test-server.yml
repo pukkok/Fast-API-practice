@@ -25,7 +25,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m venv .venv
-          .\.venv\Scripts\activate
+          source .venv/bin/activate
           pip install -r requirements.txt
 
       # 4. 환경 변수 설정
