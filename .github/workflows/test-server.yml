@@ -71,6 +71,18 @@ jobs:
       #       exit 1
       #     }
 
+      - name: Server Working Check
+        run : |
+          try {
+              $response = Invoke-WebRequest -Uri "http://127.0.0.1:5835/" -Method GET
+              Write-Host "API Response:"
+              Write-Host $response.Content
+            }
+            catch {
+              Write-Error "API 호출 실패: $_"
+              exit 1
+            }
+
       # 7. /mongo/restday-update-db 호출 (Invoke-WebRequest 사용)
       - name: Call MongoDB Update API using Invoke-WebRequest
         run: |
