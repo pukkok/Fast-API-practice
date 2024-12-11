@@ -43,3 +43,10 @@ async def root():
     return {"message" : "서버 접속 성공"}
 
 app.include_router(mogodb_router.router, prefix="/mongo", tags=["mongoDB"])
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=8080, reload=True)
+
+# 서버 실행은 다음 명령어로 실행
+# * uvicorn app.main:app --reload <- 고정된 포트 8000
+# * uvicorn app.main:app --port 8080 --reload 내가 원하는 설정으로 열기
