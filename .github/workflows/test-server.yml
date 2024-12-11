@@ -60,7 +60,7 @@ jobs:
       - name: Check if FastAPI server is running
         run: |
           try {
-            $response = Invoke-WebRequest -Uri "http://0.0.0.0:5835" -Method GET -TimeoutSec 5
+            $response = Invoke-WebRequest -Uri "http://localhost:5835" -Method GET -TimeoutSec 5
             Write-Host "Server is running. Response:"
             Write-Host $response.Content
           }
