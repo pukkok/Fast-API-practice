@@ -42,6 +42,10 @@ app = FastAPI(lifespan=lifespan)
 async def root():
     return {"code": 200, "msg": "fast-api 접속 확인"}
 
+@app.get("/hi")
+async def hi():
+    return {"code" : 200, "msg" : "안녕하세요"}
+
 # ? 연간 공휴일를 업데이트 한다.
 @app.get("/holiday-update")
 async def holiday_update(req: Request, year: Optional[int] = None):
