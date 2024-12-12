@@ -2,14 +2,15 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 import uvicorn
 from config import Config
+from motor.motor_asyncio import AsyncIOMotorClient
 
-print("----------------")
-print(Config.MONGODB_URI)
-print(Config.BASE_URL)
-print(Config.SECRET_KEY)
-print("----------------")
+# MongoDB 초기화
+class MongoDB:
+    client = AsyncIOMotorClient(Config.MONGODB_URI)
+    db = client["holiday"]
 
 app = FastAPI()
+mongo = MongoDB()
 
 @app.get("/")
 async def root():
