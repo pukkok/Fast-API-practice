@@ -8,35 +8,55 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from app.lib.get_api_url import get_api_url
 from datetime import datetime
 
-# MongoDB Initialization
+# # MongoDB Initialization
 class MongoDB:
     client = None
     db = None
 
-# * fastapi의 app.on_event를 더이상 사용하지 않는다.
-# ? lifespan 함수를 만들기 위해 사용
-# todo : asynccontextmanager 데코레이터를 사용해 앱의 생명 주기를 관리
-from contextlib import asynccontextmanager
+# # * fastapi의 app.on_event를 더이상 사용하지 않는다.
+# # ? lifespan 함수를 만들기 위해 사용
+# # todo : asynccontextmanager 데코레이터를 사용해 앱의 생명 주기를 관리
+# from contextlib import asynccontextmanager
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    app.state.mongo = MongoDB()
-    print("앱 시작: MongoDB 연결 설정 중...")
-    try:
-        app.state.mongo.client = AsyncIOMotorClient(Config.MONGODB_URI)
-        app.state.mongo.db = app.state.mongo.client["holiday"]
-        print("MongoDB 연결 성공")
-    except Exception as e:
-        print(f"MongoDB 연결 실패: {e}")
-        raise e
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     app.state.mongo = MongoDB()
+#     print("앱 시작: MongoDB 연결 설정 중...")
+#     try:
+#         app.state.mongo.client = AsyncIOMotorClient(Config.MONGODB_URI)
+#         app.state.mongo.db = app.state.mongo.client["holiday"]
+#         print("MongoDB 연결 성공")
+#     except Exception as e:
+#         print(f"MongoDB 연결 실패: {e}")
+#         raise e
     
-    yield
+#     yield
     
-    print("앱 종료: MongoDB 연결 해제 중...")
+#     print("앱 종료: MongoDB 연결 해제 중...")
+#     app.state.mongo.client.close()
+#     print("MongoDB 연결 해제 완료")
+
+# app = FastAPI(lifespan=lifespan)
+
+# 종속성: MongoDB 연결 관리
+def get_mongo() -> MongoDB:
+    mongo = MongoDB()
+    mongo.client = AsyncIOMotorClient(Config.MONGODB_URI)
+    mongo.db = mongo.client["holiday"]
+    return mongo
+
+app = FastAPI()
+
+@app.on_event("startup")
+async def startup_event():
+    mongo = get_mongo()
+    app.state.mongo = mongo
+    print("MongoDB 연결 완료")
+
+@app.on_event("shutdown")
+async def shutdown_event():
     app.state.mongo.client.close()
-    print("MongoDB 연결 해제 완료")
-
-app = FastAPI(lifespan=lifespan)
+    print("MongoDB 연결 종료")
 
 @app.get("/")
 async def root():
