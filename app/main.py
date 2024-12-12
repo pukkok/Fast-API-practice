@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 import uvicorn
 from config import Config
 from motor.motor_asyncio import AsyncIOMotorClient
+from app.lib.get_api_url import get_api_url
 
 # MongoDB 초기화
 class MongoDB:
@@ -11,6 +12,8 @@ class MongoDB:
 
 app = FastAPI()
 mongo = MongoDB()
+
+print(get_api_url(2024))
 
 @app.get("/")
 async def root():
