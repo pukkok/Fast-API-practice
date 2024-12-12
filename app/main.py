@@ -1,6 +1,13 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 import uvicorn
+from config import Config
+
+print("----------------")
+print(Config.MONGODB_URI)
+print(Config.BASE_URL)
+print(Config.SECRET_KEY)
+print("----------------")
 
 app = FastAPI()
 
