@@ -40,7 +40,7 @@ app = FastAPI(lifespan=lifespan)
 
 @app.get("/")
 async def root():
-    return {"code": 200, "msg": "서버 접속 확인"}
+    return {"code": 200, "msg": "fast-api 접속 확인"}
 
 # ? 연간 공휴일를 업데이트 한다.
 @app.get("/holiday-update")
@@ -104,5 +104,5 @@ async def not_found_handler(request: Request, exc: HTTPException):
 async def internal_error_handler(request: Request, exc: HTTPException):
     return JSONResponse(status_code=500, content={"code": 500, "msg": "서버 에러 발생"})
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+# if __name__ == "__main__":
+#     uvicorn.run(app, host="0.0.0.0", port=8080)
